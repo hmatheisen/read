@@ -1,3 +1,3 @@
-import chapter1 from "./epub";
+import { Epub } from "./epub";
 
-export default chapter1;
+export { Epub };
