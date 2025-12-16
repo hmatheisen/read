@@ -1,7 +1,7 @@
 import type JSZip from "jszip";
 import type { JSZipObject } from "jszip";
 
-import type { Epub, EpubFiles } from "./epub";
+import type { EpubFiles } from "./epub";
 import type { Item, ItemRef, Manifest, Metadata, Rootfile, Spine } from "./types";
 
 class Parser {
@@ -9,9 +9,11 @@ class Parser {
   private readonly mimeType = "application/epub+zip";
   private readonly containerPath = "META-INF/container.xml";
   private readonly rootFileMediaType = "application/oebps-package+xml";
+  private readonly xhtmlMediaType = "application/xhtml+xml";
 
-  private domParser = new DOMParser();
-  private zip: JSZip;
+  private readonly domParser = new DOMParser();
+  private readonly xmlSerializer = new XMLSerializer();
+  private readonly zip: JSZip;
 
   constructor(zip: JSZip) {
     this.zip = zip;
@@ -39,24 +41,54 @@ class Parser {
   }
 
   public async extractFiles(rootfile: Rootfile): Promise<EpubFiles> {
-    const tempFiles: { [key: string]: JSZipObject } = {};
+    const tempFiles: Array<[Item, JSZipObject]> = [];
 
     rootfile.manifest.items.forEach((item) => {
-      const path = rootfile.name.split("/").slice(0, -1).join("/") + "/" + item.href;
-      const zipObject = this.findFile(path);
+      const zipObject = this.findFile(item.href, rootfile);
 
-      tempFiles[item.href] = zipObject;
+      tempFiles.push([item, zipObject]);
     });
 
     const files: EpubFiles = {};
     await Promise.all(
-      Object.entries(tempFiles).map(async ([key, obj]) => {
+      tempFiles.map(async ([item, obj]) => {
         const content = await obj.async("string");
-        files[key] = content;
+
+        if (item.mediaType === this.xhtmlMediaType) {
+          files[item.href] = await this.parseChapter(content, rootfile);
+
+          return;
+        }
+
+        files[item.href] = content;
       }),
     );
 
     return files;
+  }
+
+  private async parseChapter(content: string, rootfile: Rootfile): Promise<string> {
+    const doc = this.domParser.parseFromString(content, "application/xhtml+xml");
+
+    const links = doc.querySelectorAll("link");
+    for (const link of links) {
+      const stylesheetPath = link.getAttribute("href");
+      const stylesheetBlob = await this.findFile(stylesheetPath!, rootfile).async("blob");
+      const stylesheetUrl = URL.createObjectURL(stylesheetBlob);
+
+      link.setAttribute("href", stylesheetUrl);
+    }
+
+    const images = doc.querySelectorAll("img");
+    for (const img of images) {
+      const imagePath = img.getAttribute("src");
+      const imageBlob = await this.findFile(imagePath!, rootfile).async("blob");
+      const imageUrl = URL.createObjectURL(imageBlob);
+
+      img.setAttribute("src", imageUrl);
+    }
+
+    return this.xmlSerializer.serializeToString(doc);
   }
 
   private parseSpine(spineEl: Element | null): Spine {
@@ -205,7 +237,13 @@ class Parser {
     return rootfile;
   }
 
-  private findFile(path: string): JSZipObject {
+  private findFile(path: string, rootfile: Rootfile): JSZipObject;
+  private findFile(path: string): JSZipObject;
+  private findFile(path: string, rootfile?: Rootfile): JSZipObject {
+    if (!!rootfile) {
+      path = rootfile.name.split("/").slice(0, -1).join("/") + "/" + path;
+    }
+
     const file = this.zip.file(path);
     if (!file) {
       throw new Error(`file not found: ${path}`);

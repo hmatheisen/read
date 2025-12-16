@@ -1,3 +1,3 @@
-import { Epub } from "./epub";
+import Epub from "./epub";
 
 export { Epub };
