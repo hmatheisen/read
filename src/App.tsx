@@ -1,38 +1,30 @@
 import { useEffect, useState } from "react";
 
 import BookPagination from "lib/BookPagination";
+import Page from "lib/Page";
 import { Epub } from "lib/epub";
 
 import epubUrl from "./lib/epub/examples/alice.epub?url";
 
 const App = () => {
-  const [html, setHtml] = useState("");
+  const [pages, setPages] = useState<Array<string>>([]);
 
   useEffect(() => {
     (async () => {
       try {
+        const startTime = performance.now();
         const epub = await Epub.fromUrl(epubUrl);
 
-        // Simple speed test.
-        // This is ridiculously fast
-        // ~0.2ms
-        const startTime = performance.now();
-
-        // Load first 10 chapters
-        let content = "";
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => {
-          const itemRef = epub.rootfile.spine.itemRefs[i];
-          const item = epub.rootfile.manifest.items.find((item) => item.id === itemRef.idref);
-          const chapter = epub.getFileContent(item!.href);
-
-          content += chapter;
+        const pages: Array<string> = [];
+        [6, 7, 8].map((i) => {
+          pages.push(epub.getChapter(i).content);
         });
-        setHtml(content);
+        setPages(pages);
 
         const endTime = performance.now();
         const duration = endTime - startTime;
 
-        console.log(`Loaded 10 chapters in ${duration} ms`);
+        console.log(`Loaded 3 chapters in ${duration} ms`);
       } catch (error) {
         console.error("Failed to load chapter:", error);
       }
@@ -41,7 +33,9 @@ const App = () => {
 
   return (
     <BookPagination>
-      <div dangerouslySetInnerHTML={{ __html: html }} />
+      <Page content={pages[0]} />
+      <Page content={pages[1]} />
+      <Page content={pages[2]} />
     </BookPagination>
   );
 };

@@ -46,6 +46,10 @@ const BookPagination = ({ children }: Props) => {
   };
 
   const onTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+    if (!divRef.current) {
+      return;
+    }
+
     const touch = e.changedTouches[0];
     const x = touch.screenX;
     const y = touch.screenY;
@@ -59,7 +63,7 @@ const BookPagination = ({ children }: Props) => {
     touchStateRef.current.vy = dy / dt;
     touchStateRef.current.time = e.timeStamp;
 
-    divRef.current?.scrollBy({ left: dx });
+    divRef.current.scrollBy({ left: dx });
   };
 
   const onTouchEnd = () => {

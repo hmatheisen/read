@@ -4,14 +4,17 @@ import Parser from "./parser";
 import type { Rootfile } from "./types";
 
 export type EpubFiles = { [key: string]: string };
+export type Chapter = { content: string };
 
 class Epub {
   readonly rootfile: Rootfile;
   private readonly files: EpubFiles;
+  private readonly chapters: Array<Chapter>;
 
-  private constructor(rootfile: Rootfile, files: EpubFiles) {
+  private constructor(rootfile: Rootfile, files: EpubFiles, chapters: Array<Chapter>) {
     this.rootfile = rootfile;
     this.files = files;
+    this.chapters = chapters;
   }
 
   public static async fromUrl(url: string, options?: JSZipLoadOptions): Promise<Epub> {
@@ -23,11 +26,13 @@ class Epub {
 
     const rootfile = await parser.parseRootfile();
     const files = await parser.extractFiles(rootfile);
+    const chapters = await parser.extractChapters(files, rootfile);
 
-    return new Epub(rootfile, files);
+    return new Epub(rootfile, files, chapters);
   }
 
   public getFileContent = (filePath: string): string => this.files[filePath];
+  public getChapter = (index: number): Chapter => this.chapters[index];
 }
 
 export default Epub;

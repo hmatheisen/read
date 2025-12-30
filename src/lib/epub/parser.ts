@@ -1,7 +1,7 @@
 import type JSZip from "jszip";
 import type { JSZipObject } from "jszip";
 
-import type { EpubFiles } from "./epub";
+import type { Chapter, EpubFiles } from "./epub";
 import type { Item, ItemRef, Manifest, Metadata, Rootfile, Spine } from "./types";
 
 class Parser {
@@ -65,6 +65,14 @@ class Parser {
     );
 
     return files;
+  }
+
+  public async extractChapters(files: EpubFiles, rootfile: Rootfile): Promise<Array<Chapter>> {
+    const itemRefs = rootfile.spine.itemRefs;
+    const idrefs = itemRefs.map((itemRefs) => itemRefs.idref);
+    const items = idrefs.map((idref) => rootfile.manifest.items.find((item) => item.id === idref)!);
+
+    return items.map((item) => ({ content: files[item.href] }));
   }
 
   private async parseChapter(content: string, rootfile: Rootfile): Promise<string> {
@@ -240,7 +248,7 @@ class Parser {
   private findFile(path: string, rootfile: Rootfile): JSZipObject;
   private findFile(path: string): JSZipObject;
   private findFile(path: string, rootfile?: Rootfile): JSZipObject {
-    if (!!rootfile) {
+    if (rootfile) {
       path = rootfile.name.split("/").slice(0, -1).join("/") + "/" + path;
     }
 
