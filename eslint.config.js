@@ -1,7 +1,5 @@
-import js from "@eslint/js";
-import react from "eslint-plugin-react";
-import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
+import eslintReact from "@eslint-react/eslint-plugin";
+import jseslint from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -11,17 +9,16 @@ export default defineConfig([
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
-      js.configs.recommended,
+      jseslint.configs.recommended,
       tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+      eslintReact.configs["recommended-typescript"],
     ],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-    },
-    plugins: {
-      react,
+      parser: tseslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootdir: import.meta.dirname,
+      },
     },
   },
 ]);
