@@ -8,7 +8,11 @@ import EpubReader from "./EpubReader";
 const App = () => {
   const [epub, setEpub] = useState<Epub | null>(null);
 
-  return <>{epub === null ? <EpubInput setEpub={setEpub} /> : <EpubReader epub={epub} />}</>;
+  if (epub === null) {
+    return <EpubInput setEpub={setEpub} />;
+  }
+
+  return <EpubReader epub={epub} />;
 };
 
 export default App;

@@ -3,8 +3,13 @@ type Props = {
 };
 
 const Page = ({ content }: Props) => {
-  // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
-  return <div style={{ breakBefore: "column" }} dangerouslySetInnerHTML={{ __html: content }} />;
+  return (
+    <div
+      className="break-inside-avoid-column break-before-column break-after-column px-7"
+      // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
+  );
 };
 
 export default Page;

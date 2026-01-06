@@ -4,16 +4,14 @@ import Parser from "./parser";
 import type { Rootfile } from "./types";
 
 export type EpubFiles = { [key: string]: string };
-export type Chapter = { content: string };
+export type Chapter = { id: string; content: string };
 
 class Epub {
   readonly rootfile: Rootfile;
-  private readonly files: EpubFiles;
-  private readonly chapters: Array<Chapter>;
+  readonly chapters: Array<Chapter>;
 
-  private constructor(rootfile: Rootfile, files: EpubFiles, chapters: Array<Chapter>) {
+  private constructor(rootfile: Rootfile, chapters: Array<Chapter>) {
     this.rootfile = rootfile;
-    this.files = files;
     this.chapters = chapters;
   }
 
@@ -32,10 +30,8 @@ class Epub {
     const files = await parser.extractFiles(rootfile);
     const chapters = await parser.extractChapters(files, rootfile);
 
-    return new Epub(rootfile, files, chapters);
+    return new Epub(rootfile, chapters);
   }
-  public getFileContent = (filePath: string): string => this.files[filePath];
-  public getChapter = (index: number): Chapter => this.chapters[index];
 }
 
 export default Epub;

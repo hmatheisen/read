@@ -1,27 +1,15 @@
-import { type CSSProperties, type ReactNode, type TouchEvent, useRef } from "react";
+import { type ReactNode, type TouchEvent, useRef } from "react";
 
 type TouchState = {
   x: number;
-  y: number;
   vx: number;
-  vy: number;
   time: number;
 };
 
 const touchStateInit: TouchState = {
   x: 0,
-  y: 0,
   vx: 0,
-  vy: 0,
   time: 0,
-};
-
-const paginationStyleSheet: CSSProperties = {
-  height: "100dvh",
-  columnWidth: "100dvw",
-  columnGap: 0,
-  overflow: "hidden",
-  boxSizing: "border-box",
 };
 
 type Props = {
@@ -34,11 +22,9 @@ const BookPagination = ({ children }: Props) => {
 
   const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
     const touch = e.changedTouches[0];
-    const newTouchState = {
+    const newTouchState: TouchState = {
       x: touch.screenX,
-      y: touch.screenY,
       vx: 0,
-      vy: 0,
       time: e.timeStamp,
     };
 
@@ -52,15 +38,11 @@ const BookPagination = ({ children }: Props) => {
 
     const touch = e.changedTouches[0];
     const x = touch.screenX;
-    const y = touch.screenY;
     const dx = touchStateRef.current.x - x;
-    const dy = touchStateRef.current.y - y;
     const dt = e.timeStamp - touchStateRef.current.time;
 
     touchStateRef.current.x = x;
     touchStateRef.current.vx = dx / dt;
-    touchStateRef.current.y = y;
-    touchStateRef.current.vy = dy / dt;
     touchStateRef.current.time = e.timeStamp;
 
     divRef.current.scrollBy({ left: dx });
@@ -84,7 +66,7 @@ const BookPagination = ({ children }: Props) => {
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      style={paginationStyleSheet}
+      className="h-dvh columns-[100dvw] gap-x-0 overflow-hidden box-border py-10"
       ref={divRef}
     >
       {children}
