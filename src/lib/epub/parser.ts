@@ -1,5 +1,6 @@
 import type JSZip from "jszip";
 import type { JSZipObject } from "jszip";
+import * as p from "path";
 
 import type { Chapter, EpubFiles } from "./epub";
 import type { Item, ItemRef, Manifest, Metadata, Rootfile, Spine } from "./types";
@@ -44,7 +45,7 @@ class Parser {
     const tempFiles: Array<[Item, JSZipObject]> = [];
 
     rootfile.manifest.items.forEach(item => {
-      const zipObject = this.findFile(item.href, rootfile);
+      const zipObject = this.findFile(item.href, { from: rootfile.name });
 
       tempFiles.push([item, zipObject]);
     });
@@ -55,7 +56,10 @@ class Parser {
         const content = await obj.async("string");
 
         if (item.mediaType === this.xhtmlMediaType) {
-          files[item.href] = await this.parseChapter(content, rootfile);
+          files[item.href] = await this.parseChapter(
+            content,
+            p.join(p.dirname(rootfile.name), item.href),
+          );
 
           return;
         }
@@ -75,13 +79,13 @@ class Parser {
     return items.map(item => ({ content: files[item.href], id: item.id }));
   }
 
-  private async parseChapter(content: string, rootfile: Rootfile): Promise<string> {
+  private async parseChapter(content: string, from: string): Promise<string> {
     const doc = this.domParser.parseFromString(content, "application/xhtml+xml");
 
     const links = doc.querySelectorAll("link");
     for (const link of links) {
       const stylesheetPath = link.getAttribute("href");
-      const stylesheetBlob = await this.findFile(stylesheetPath!, rootfile).async("blob");
+      const stylesheetBlob = await this.findFile(stylesheetPath!, { from }).async("blob");
       const stylesheetUrl = URL.createObjectURL(stylesheetBlob);
 
       link.setAttribute("href", stylesheetUrl);
@@ -90,7 +94,7 @@ class Parser {
     const images = doc.querySelectorAll("img");
     for (const img of images) {
       const imagePath = img.getAttribute("src");
-      const imageBlob = await this.findFile(imagePath!, rootfile).async("blob");
+      const imageBlob = await this.findFile(imagePath!, { from }).async("blob");
       const imageUrl = URL.createObjectURL(imageBlob);
 
       img.setAttribute("src", imageUrl);
@@ -245,11 +249,9 @@ class Parser {
     return rootfile;
   }
 
-  private findFile(path: string, rootfile: Rootfile): JSZipObject;
-  private findFile(path: string): JSZipObject;
-  private findFile(path: string, rootfile?: Rootfile): JSZipObject {
-    if (rootfile) {
-      path = rootfile.name.split("/").slice(0, -1).join("/") + "/" + path;
+  private findFile(path: string, options?: { from: string }): JSZipObject {
+    if (options !== undefined) {
+      path = p.join(p.dirname(options.from), path);
     }
 
     const file = this.zip.file(path);
