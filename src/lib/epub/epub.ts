@@ -21,6 +21,10 @@ class Epub {
     const res = await fetch(url);
     const bytes = await res.arrayBuffer();
 
+    return this.fromBytes(bytes, options);
+  }
+
+  public static async fromBytes(bytes: ArrayBuffer, options?: JSZipLoadOptions): Promise<Epub> {
     const zip = await loadAsync(bytes, options);
     const parser = new Parser(zip);
 
@@ -30,7 +34,6 @@ class Epub {
 
     return new Epub(rootfile, files, chapters);
   }
-
   public getFileContent = (filePath: string): string => this.files[filePath];
   public getChapter = (index: number): Chapter => this.chapters[index];
 }

@@ -10,11 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
     "jszip": "^3.10.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
     "@eslint-react/eslint-plugin": "^2.5.1",
     "@eslint/js": "^9.39.1",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",

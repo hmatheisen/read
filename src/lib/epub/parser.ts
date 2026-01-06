@@ -43,7 +43,7 @@ class Parser {
   public async extractFiles(rootfile: Rootfile): Promise<EpubFiles> {
     const tempFiles: Array<[Item, JSZipObject]> = [];
 
-    rootfile.manifest.items.forEach((item) => {
+    rootfile.manifest.items.forEach(item => {
       const zipObject = this.findFile(item.href, rootfile);
 
       tempFiles.push([item, zipObject]);
@@ -69,10 +69,10 @@ class Parser {
 
   public async extractChapters(files: EpubFiles, rootfile: Rootfile): Promise<Array<Chapter>> {
     const itemRefs = rootfile.spine.itemRefs;
-    const idrefs = itemRefs.map((itemRefs) => itemRefs.idref);
-    const items = idrefs.map((idref) => rootfile.manifest.items.find((item) => item.id === idref)!);
+    const idrefs = itemRefs.map(itemRefs => itemRefs.idref);
+    const items = idrefs.map(idref => rootfile.manifest.items.find(item => item.id === idref)!);
 
-    return items.map((item) => ({ content: files[item.href] }));
+    return items.map(item => ({ content: files[item.href] }));
   }
 
   private async parseChapter(content: string, rootfile: Rootfile): Promise<string> {
@@ -106,7 +106,7 @@ class Parser {
 
     const itemRefs: Array<ItemRef> = [];
 
-    spineEl.childNodes.forEach((node) => {
+    spineEl.childNodes.forEach(node => {
       if (node.nodeName !== "itemref") {
         return;
       }
@@ -131,7 +131,7 @@ class Parser {
 
     const items: Array<Item> = [];
 
-    manifestEl.childNodes.forEach((node) => {
+    manifestEl.childNodes.forEach(node => {
       if (node.nodeName !== "item") {
         return;
       }
@@ -176,8 +176,8 @@ class Parser {
       "dc:type": null,
     };
 
-    metadataEl.childNodes.forEach((node) => {
-      Object.keys(attributes).map((key) => {
+    metadataEl.childNodes.forEach(node => {
+      Object.keys(attributes).map(key => {
         if (node.nodeName === key) {
           attributes[key] = node.textContent;
 
@@ -187,7 +187,7 @@ class Parser {
     });
 
     const mandatoryAttribtues = ["dc:identifier", "dc:language", "dc:title"];
-    mandatoryAttribtues.forEach((attr) => {
+    mandatoryAttribtues.forEach(attr => {
       if (attributes[attr] === null) {
         throw new Error(`Mandatory attribute ${attr} is missing`);
       }

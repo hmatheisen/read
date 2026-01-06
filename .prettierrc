@@ -1,6 +1,7 @@
 {
   "printWidth": 100,
   "tabWidth": 2,
+  "arrowParens": "avoid",
   "plugins": ["@trivago/prettier-plugin-sort-imports"],
   "importOrder": ["<THIRD_PARTY_MODULES>", "^src/(.*)$", "^lib/(.*)$", "^[./]"],
   "importOrderSeparation": true,
