@@ -1,2 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&display=swap");
+
 @import "tailwindcss" important;
+
 @custom-variant dark (&:where(.dark, .dark *));
+
+img {
+  filter: invert();
+  mix-blend-mode: lighten;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+p {
+  text-align: left !important;
+  font-family: "Literata", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-bottom: 22px;
+}

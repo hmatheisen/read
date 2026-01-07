@@ -1,5 +1,7 @@
 import { type ReactNode, type TouchEvent, useRef } from "react";
 
+import type { PushChaptersFn } from "./EpubReader";
+
 type TouchState = {
   x: number;
   vx: number;
@@ -13,10 +15,11 @@ const touchStateInit: TouchState = {
 };
 
 type Props = {
+  pushChapters: PushChaptersFn;
   children: ReactNode;
 };
 
-const BookPagination = ({ children }: Props) => {
+const BookPagination = ({ children, pushChapters }: Props) => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const touchStateRef = useRef(touchStateInit);
 
@@ -48,6 +51,50 @@ const BookPagination = ({ children }: Props) => {
     divRef.current.scrollBy({ left: dx });
   };
 
+  const pushChaptersRight = () => {
+    if (!divRef.current) {
+      return;
+    }
+
+    const firstChapter = divRef.current.childNodes.item(1) as HTMLDivElement;
+    const offsetLeft = firstChapter.offsetLeft;
+    const hasMoved = pushChapters("right");
+    if (!hasMoved) {
+      return;
+    }
+
+    divRef.current.scrollBy({ left: -offsetLeft });
+
+    const columnWidth = divRef.current.clientWidth;
+    const scrollLeft = divRef.current.scrollLeft;
+    const columnIndex = Math.round(scrollLeft / columnWidth);
+    const targetScrollLeft = columnIndex * columnWidth;
+
+    divRef.current.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
+  };
+
+  const pushChaptersLeft = () => {
+    if (!divRef.current) {
+      return;
+    }
+
+    const hasMoved = pushChapters("left");
+    if (!hasMoved) {
+      return;
+    }
+
+    const firstChapter = divRef.current.childNodes.item(1) as HTMLDivElement;
+    const offsetLeft = firstChapter.offsetLeft;
+    divRef.current.scrollBy({ left: offsetLeft });
+
+    const columnWidth = divRef.current.clientWidth;
+    const scrollLeft = divRef.current.scrollLeft;
+    const columnIndex = Math.round(scrollLeft / columnWidth);
+    const targetScrollLeft = columnIndex * columnWidth;
+
+    divRef.current.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
+  };
+
   const onTouchEnd = () => {
     if (!divRef.current) {
       return;
@@ -59,6 +106,18 @@ const BookPagination = ({ children }: Props) => {
     const targetScrollLeft = columnIndex * columnWidth;
 
     divRef.current.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
+
+    const totalWidth = divRef.current.scrollWidth;
+    const totalColumns = totalWidth / columnWidth;
+    if (columnIndex > totalColumns - 2) {
+      console.log("right");
+      pushChaptersRight();
+    }
+
+    if (columnIndex < 1) {
+      console.log("left");
+      pushChaptersLeft();
+    }
   };
 
   return (
