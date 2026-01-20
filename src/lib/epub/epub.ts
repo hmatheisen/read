@@ -4,7 +4,7 @@ import Parser from "./parser";
 import type { Rootfile } from "./types";
 
 export type EpubFiles = { [key: string]: string };
-export type Chapter = { id: string; content: string };
+export type Chapter = { id: string; content: string; href: string };
 
 class Epub {
   readonly rootfile: Rootfile;

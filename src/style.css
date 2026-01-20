@@ -4,7 +4,7 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-img {
+/* img {
   filter: invert();
   mix-blend-mode: lighten;
   margin-left: auto;
@@ -25,4 +25,4 @@ h4,
 h5,
 h6 {
   margin-bottom: 22px;
-}
+} */

@@ -1,53 +1,60 @@
 import { useState } from "react";
 
-import type { Epub } from "lib/epub";
+import { Epub } from "lib/epub";
 
 import BookPagination from "./BookPagination";
-import Page from "./Page";
+import Chapter from "./Chapter";
 
-type Direction = "left" | "right";
-export type PushChaptersFn = (direction: Direction) => boolean;
+export type ComputedChapterPages = {
+  startPage: number;
+  endPage: number;
+  totalPages: number;
+};
+
+export type PaginationInfo = {
+  currentPage: number;
+  totalPages: number;
+  chapterPages: Array<ComputedChapterPages>;
+};
+
+const initPaginationInfo: PaginationInfo = {
+  currentPage: 0,
+  totalPages: 0,
+  chapterPages: [],
+};
 
 type Props = {
   epub: Epub;
 };
 
 const EpubReader = ({ epub }: Props) => {
-  const [chaptersIndex, setChaptersIndex] = useState([0, 1, 2]);
+  const [paginationInfo, setPaginationInfo] = useState(initPaginationInfo);
 
-  console.log(chaptersIndex);
-  const pushChapters: PushChaptersFn = direction => {
-    const chaptersCount = epub.chapters.length;
-    const firstIndex = chaptersIndex[0];
-    const lastIndex = chaptersIndex[chaptersIndex.length - 1];
-
-    // beggining of book
-    if (direction === "left" && firstIndex === 0) {
-      return false;
-    }
-
-    // end of book
-    if (direction === "right" && lastIndex === chaptersCount) {
-      return false;
-    }
-
-    // scroll chapters right
-    if (direction === "right") {
-      setChaptersIndex(prevIndices => prevIndices.map(i => i + 1));
-      return true;
-    }
-
-    // scroll chapters left
-    setChaptersIndex(prevIndices => prevIndices.map(i => i - 1));
-    return true;
-  };
+  const currentChapterPages = paginationInfo.chapterPages.find(
+    chapter =>
+      chapter.startPage <= paginationInfo.currentPage &&
+      chapter.endPage >= paginationInfo.currentPage,
+  ) || { startPage: 0, endPage: 0, totalPages: 0 };
 
   return (
-    <BookPagination pushChapters={pushChapters}>
-      {chaptersIndex
-        .map(i => epub.chapters[i])
-        .map(chapter => !!chapter && <Page key={chapter.id} content={chapter.content} />)}
-    </BookPagination>
+    <>
+      <div className="h-10 text-gray-400 text-sm flex items-center justify-center">
+        {epub.rootfile.metadata.title} - {epub.rootfile.metadata.creator}
+      </div>
+
+      <BookPagination setPaginationInfo={setPaginationInfo}>
+        {epub.chapters.map(chapter => (
+          <Chapter key={chapter.id} content={chapter.content} />
+        ))}
+      </BookPagination>
+
+      <div className="h-10 text-gray-400 text-sm flex items-center justify-around">
+        <span>{`${paginationInfo.currentPage}/${paginationInfo.totalPages}`}</span>
+        <span>
+          {`${paginationInfo.currentPage - currentChapterPages.startPage}/${currentChapterPages.totalPages}`}
+        </span>
+      </div>
+    </>
   );
 };
 

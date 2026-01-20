@@ -1,6 +1,19 @@
-import { type ReactNode, type TouchEvent, useRef } from "react";
+import {
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+  type TouchEvent,
+  useEffect,
+  useRef,
+} from "react";
 
-import type { PushChaptersFn } from "./EpubReader";
+import type { PaginationInfo } from "./EpubReader";
+
+type ComputedChapterPages = {
+  startPage: number;
+  endPage: number;
+  totalPages: number;
+};
 
 type TouchState = {
   x: number;
@@ -15,13 +28,75 @@ const touchStateInit: TouchState = {
 };
 
 type Props = {
-  pushChapters: PushChaptersFn;
   children: ReactNode;
+  setPaginationInfo: Dispatch<SetStateAction<PaginationInfo>>;
 };
 
-const BookPagination = ({ children, pushChapters }: Props) => {
-  const divRef = useRef<HTMLDivElement | null>(null);
+const BookPagination = ({ children, setPaginationInfo }: Props) => {
   const touchStateRef = useRef(touchStateInit);
+  const divRef = useRef<HTMLDivElement>(null);
+
+  const setTotalPages = () => {
+    if (!divRef.current) {
+      return;
+    }
+
+    const columnWidth = divRef.current.clientWidth;
+    const scrollWidth = divRef.current.scrollWidth;
+    const totalPages = Math.ceil(scrollWidth / columnWidth);
+
+    setPaginationInfo(info => ({ ...info, totalPages }));
+  };
+
+  const setCurrentPage = () => {
+    if (!divRef.current) {
+      return;
+    }
+
+    const columnWidth = divRef.current.clientWidth;
+    const scrollLeft = divRef.current.scrollLeft;
+    const columnIndex = Math.round(scrollLeft / columnWidth);
+
+    setPaginationInfo(info => ({ ...info, currentPage: columnIndex + 1 }));
+  };
+
+  const computeChapterPages = () => {
+    if (!divRef.current) {
+      return;
+    }
+
+    const columnWidth = divRef.current.clientWidth;
+    const totalScrollWidth = divRef.current.scrollWidth;
+
+    const elements: Array<HTMLElement> = [];
+    divRef.current.childNodes.forEach(node => elements.push(node as HTMLElement));
+
+    const chapterPages = elements.map((element, index) => {
+      // Get the element's left offset relative to the scroll container
+      const offsetLeft = element.offsetLeft;
+      const offsetRight =
+        index < elements.length - 1 ? elements[index + 1].offsetLeft : totalScrollWidth;
+
+      // Calculate start page and page count
+      const startPage = Math.floor(offsetLeft / columnWidth);
+      const endPage = Math.ceil(offsetRight / columnWidth);
+      const totalPages = endPage - startPage;
+
+      return { startPage, endPage, totalPages } as ComputedChapterPages;
+    });
+
+    setPaginationInfo(info => ({ ...info, chapterPages }));
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setCurrentPage();
+      setTotalPages();
+      computeChapterPages();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [children]);
 
   const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
     const touch = e.changedTouches[0];
@@ -51,51 +126,7 @@ const BookPagination = ({ children, pushChapters }: Props) => {
     divRef.current.scrollBy({ left: dx });
   };
 
-  const pushChaptersRight = () => {
-    if (!divRef.current) {
-      return;
-    }
-
-    const firstChapter = divRef.current.childNodes.item(1) as HTMLDivElement;
-    const offsetLeft = firstChapter.offsetLeft;
-    const hasMoved = pushChapters("right");
-    if (!hasMoved) {
-      return;
-    }
-
-    divRef.current.scrollBy({ left: -offsetLeft });
-
-    const columnWidth = divRef.current.clientWidth;
-    const scrollLeft = divRef.current.scrollLeft;
-    const columnIndex = Math.round(scrollLeft / columnWidth);
-    const targetScrollLeft = columnIndex * columnWidth;
-
-    divRef.current.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
-  };
-
-  const pushChaptersLeft = () => {
-    if (!divRef.current) {
-      return;
-    }
-
-    const hasMoved = pushChapters("left");
-    if (!hasMoved) {
-      return;
-    }
-
-    const firstChapter = divRef.current.childNodes.item(1) as HTMLDivElement;
-    const offsetLeft = firstChapter.offsetLeft;
-    divRef.current.scrollBy({ left: offsetLeft });
-
-    const columnWidth = divRef.current.clientWidth;
-    const scrollLeft = divRef.current.scrollLeft;
-    const columnIndex = Math.round(scrollLeft / columnWidth);
-    const targetScrollLeft = columnIndex * columnWidth;
-
-    divRef.current.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
-  };
-
-  const onTouchEnd = () => {
+  const onTouchEnd = async () => {
     if (!divRef.current) {
       return;
     }
@@ -105,27 +136,38 @@ const BookPagination = ({ children, pushChapters }: Props) => {
     const columnIndex = Math.round(scrollLeft / columnWidth);
     const targetScrollLeft = columnIndex * columnWidth;
 
+    setCurrentPage();
+
     divRef.current.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
-
-    const totalWidth = divRef.current.scrollWidth;
-    const totalColumns = totalWidth / columnWidth;
-    if (columnIndex > totalColumns - 2) {
-      console.log("right");
-      pushChaptersRight();
-    }
-
-    if (columnIndex < 1) {
-      console.log("left");
-      pushChaptersLeft();
-    }
   };
+
+  // const onClick: MouseEventHandler<HTMLDivElement> = e => {
+  //   if (!divRef.current) {
+  //     return;
+  //   }
+
+  //   e.preventDefault();
+
+  //   const el = e.target as HTMLElement;
+  //   const nodeName = el.nodeName;
+
+  //   if (nodeName === "A") {
+  //     const anchor = el as HTMLAnchorElement;
+  //     const href = anchor.getAttribute("href");
+
+  //     if (href) {
+  //       onAnchorClick(href);
+  //     }
+  //   }
+  // };
 
   return (
     <div
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      className="h-dvh columns-[100dvw] gap-x-0 overflow-hidden box-border py-10"
+      style={{ height: "calc(100dvh - 80px)" }}
+      className="columns-[100dvw] gap-x-0 overflow-hidden box-border"
       ref={divRef}
     >
       {children}

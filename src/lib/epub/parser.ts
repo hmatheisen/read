@@ -76,7 +76,7 @@ class Parser {
     const idrefs = itemRefs.map(itemRefs => itemRefs.idref);
     const items = idrefs.map(idref => rootfile.manifest.items.find(item => item.id === idref)!);
 
-    return items.map(item => ({ content: files[item.href], id: item.id }));
+    return items.map(item => ({ content: files[item.href], id: item.id, href: item.href }));
   }
 
   private async parseChapter(content: string, from: string): Promise<string> {
