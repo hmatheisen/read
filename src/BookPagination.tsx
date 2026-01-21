@@ -1,5 +1,6 @@
 import {
   type Dispatch,
+  type MouseEventHandler,
   type ReactNode,
   type SetStateAction,
   type TouchEvent,
@@ -8,6 +9,7 @@ import {
 } from "react";
 
 import type { PaginationInfo } from "./EpubReader";
+import { waitForScrollEnd } from "./helpers/waitFroScrollToEnd";
 
 type ComputedChapterPages = {
   startPage: number;
@@ -126,12 +128,28 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
     divRef.current.scrollBy({ left: dx });
   };
 
-  const onTouchEnd = async () => {
+  const onTouchEnd = async (e: TouchEvent<HTMLDivElement>) => {
     if (!divRef.current) {
       return;
     }
 
     const columnWidth = divRef.current.clientWidth;
+
+    // Simple touch event
+    if (touchStateRef.current.vx === 0) {
+      const clientX = e.changedTouches[0].clientX;
+
+      if (clientX <= columnWidth / 3.0) {
+        divRef.current.scrollBy({ left: -columnWidth, behavior: "smooth" });
+        await waitForScrollEnd(divRef.current);
+      }
+
+      if (clientX >= (columnWidth * 2) / 3.0) {
+        divRef.current.scrollBy({ left: columnWidth, behavior: "smooth" });
+        await waitForScrollEnd(divRef.current);
+      }
+    }
+
     const scrollLeft = divRef.current.scrollLeft;
     const columnIndex = Math.round(scrollLeft / columnWidth);
     const targetScrollLeft = columnIndex * columnWidth;
@@ -141,31 +159,20 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
     divRef.current.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
   };
 
-  // const onClick: MouseEventHandler<HTMLDivElement> = e => {
-  //   if (!divRef.current) {
-  //     return;
-  //   }
+  const onClick: MouseEventHandler<HTMLDivElement> = e => {
+    if (!divRef.current) {
+      return;
+    }
 
-  //   e.preventDefault();
-
-  //   const el = e.target as HTMLElement;
-  //   const nodeName = el.nodeName;
-
-  //   if (nodeName === "A") {
-  //     const anchor = el as HTMLAnchorElement;
-  //     const href = anchor.getAttribute("href");
-
-  //     if (href) {
-  //       onAnchorClick(href);
-  //     }
-  //   }
-  // };
+    e.preventDefault();
+  };
 
   return (
     <div
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onClick={onClick}
       className="columns-[100dvw] h-(--reader-height) gap-x-0 overflow-hidden box-border"
       ref={divRef}
     >
