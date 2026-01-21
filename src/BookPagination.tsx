@@ -166,8 +166,7 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      style={{ height: "calc(100dvh - 80px)" }}
-      className="columns-[100dvw] gap-x-0 overflow-hidden box-border"
+      className="columns-[100dvw] h-(--reader-height) gap-x-0 overflow-hidden box-border"
       ref={divRef}
     >
       {children}

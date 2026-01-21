@@ -1,10 +1,20 @@
 @import url("https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
 @import "tailwindcss" important;
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* img {
+@theme {
+  --font-serif: "Literata", serif;
+  --font-mono: "Roboto", monospace;
+  --header-height: calc(var(--spacing) * 10) !important;
+  --footer-height: calc(var(--spacing) * 10) !important;
+  --reader-height: calc(100dvh - var(--header-height) - var(--footer-height)) !important;
+  --reader-x-padding: calc(var(--spacing) * 7) !important;
+}
+
+img {
   filter: invert();
   mix-blend-mode: lighten;
   margin-left: auto;
@@ -13,16 +23,7 @@
 
 p {
   text-align: left !important;
-  font-family: "Literata", serif;
+  font-family: var(--font-serif);
   font-optical-sizing: auto;
   font-style: normal;
 }
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin-bottom: 22px;
-} */

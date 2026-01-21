@@ -38,7 +38,7 @@ const EpubReader = ({ epub }: Props) => {
 
   return (
     <>
-      <div className="h-10 text-gray-400 text-sm flex items-center justify-center">
+      <div className="h-(--header-height) text-gray-400 text-sm flex items-center justify-center">
         {epub.rootfile.metadata.title} - {epub.rootfile.metadata.creator}
       </div>
 
@@ -48,7 +48,7 @@ const EpubReader = ({ epub }: Props) => {
         ))}
       </BookPagination>
 
-      <div className="h-10 text-gray-400 text-sm flex items-center justify-around">
+      <div className="h-(--footer-height) text-gray-400 text-sm flex items-center justify-around">
         <span>{`${paginationInfo.currentPage}/${paginationInfo.totalPages}`}</span>
         <span>
           {`${paginationInfo.currentPage - currentChapterPages.startPage}/${currentChapterPages.totalPages}`}

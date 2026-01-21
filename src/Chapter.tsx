@@ -10,7 +10,7 @@ const Chapter = ({ content }: Props) => {
   return (
     <div
       ref={divRef}
-      className="break-inside-avoid-column break-before-column break-after-column px-7"
+      className="break-inside-avoid-column break-before-column break-after-column px-(--reader-x-padding)"
       // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
       dangerouslySetInnerHTML={{ __html: content }}
     />
