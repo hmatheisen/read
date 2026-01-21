@@ -16,6 +16,10 @@ class Parser {
   private readonly xmlSerializer = new XMLSerializer();
   private readonly zip: JSZip;
 
+  // Resource cache maps
+  private resourceURLs = new Map<string, string>();
+  private resourcePromises = new Map<string, Promise<string>>();
+
   constructor(zip: JSZip) {
     this.zip = zip;
   }
@@ -84,23 +88,50 @@ class Parser {
 
     const links = doc.querySelectorAll("link");
     for (const link of links) {
-      const stylesheetPath = link.getAttribute("href");
-      const stylesheetBlob = await this.findFile(stylesheetPath!, { from }).async("blob");
-      const stylesheetUrl = URL.createObjectURL(stylesheetBlob);
+      const stylesheetPath = link.getAttribute("href")!;
+      const stylesheetUrl = await this.getResourceUrl(stylesheetPath, from);
 
+      // Replace attribute in chapter
       link.setAttribute("href", stylesheetUrl);
     }
 
     const images = doc.querySelectorAll("img");
     for (const img of images) {
-      const imagePath = img.getAttribute("src");
-      const imageBlob = await this.findFile(imagePath!, { from }).async("blob");
-      const imageUrl = URL.createObjectURL(imageBlob);
+      const imagePath = img.getAttribute("src")!;
+      const imageUrl = await this.getResourceUrl(imagePath, from);
 
       img.setAttribute("src", imageUrl);
     }
 
     return this.xmlSerializer.serializeToString(doc);
+  }
+
+  private async getResourceUrl(path: string, from: string): Promise<string> {
+    // Check if already computed
+    if (this.resourceURLs.has(path)) {
+      return this.resourceURLs.get(path)!;
+    }
+
+    // Check if currently being computed
+    if (this.resourcePromises.has(path)) {
+      return await this.resourcePromises.get(path)!;
+    }
+
+    // Create new computation
+    const promise = this.findFile(path, { from })
+      .async("blob")
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+
+        this.resourceURLs.set(path, url);
+        this.resourcePromises.delete(path);
+
+        return url;
+      });
+
+    this.resourcePromises.set(path, promise);
+
+    return promise;
   }
 
   private parseSpine(spineEl: Element | null): Spine {
