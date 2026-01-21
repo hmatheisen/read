@@ -8,10 +8,17 @@
 @theme {
   --font-serif: "Literata", serif;
   --font-mono: "Roboto", monospace;
-  --header-height: calc(var(--spacing) * 10) !important;
-  --footer-height: calc(var(--spacing) * 10) !important;
-  --reader-height: calc(100dvh - var(--header-height) - var(--footer-height)) !important;
-  --reader-x-padding: calc(var(--spacing) * 7) !important;
+  --header-height: calc(var(--spacing) * 8);
+  --footer-height: calc(var(--spacing) * 8);
+  --reader-top-padding: calc(var(--spacing) * 10);
+  --reader-bottom-padding: calc(var(--spacing) * 5);
+  --reader-height: calc(
+    100dvh - var(--header-height) - var(--footer-height) - var(--reader-top-padding) -
+      var(--reader-bottom-padding)
+  );
+  --reader-x-padding: calc(var(--spacing) * 7);
+  --reader-text-size: 12px;
+  --reader-line-height: 1.2;
 }
 
 img {
@@ -23,7 +30,7 @@ img {
 
 p {
   text-align: left !important;
-  font-family: var(--font-serif);
-  font-optical-sizing: auto;
-  font-style: normal;
+  font-family: var(--font-serif) !important;
+  font-size: var(--reader-text-size) !important;
+  line-height: var(--reader-line-height) !important;
 }

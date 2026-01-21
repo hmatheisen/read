@@ -80,8 +80,8 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
         index < elements.length - 1 ? elements[index + 1].offsetLeft : totalScrollWidth;
 
       // Calculate start page and page count
-      const startPage = Math.floor(offsetLeft / columnWidth);
-      const endPage = Math.ceil(offsetRight / columnWidth);
+      const startPage = Math.round(offsetLeft / columnWidth);
+      const endPage = Math.round(offsetRight / columnWidth);
       const totalPages = endPage - startPage;
 
       return { startPage, endPage, totalPages } as ComputedChapterPages;
@@ -154,9 +154,8 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
     const columnIndex = Math.round(scrollLeft / columnWidth);
     const targetScrollLeft = columnIndex * columnWidth;
 
-    setCurrentPage();
-
     divRef.current.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
+    setCurrentPage();
   };
 
   const onClick: MouseEventHandler<HTMLDivElement> = e => {
@@ -173,7 +172,7 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onClick={onClick}
-      className="columns-[100dvw] h-(--reader-height) gap-x-0 overflow-hidden box-border"
+      className="columns-[100dvw] h-(--reader-height) text-(--reader-text-size) gap-x-0 overflow-hidden box-border"
       ref={divRef}
     >
       {children}
