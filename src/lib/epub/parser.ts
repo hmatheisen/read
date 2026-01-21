@@ -75,6 +75,17 @@ class Parser {
     return files;
   }
 
+  public findNavDocument(files: EpubFiles, rootfile: Rootfile): Document {
+    const item = rootfile.manifest.items.find(item => item.properties === "nav");
+    if (!item) {
+      throw new Error("No nav document found");
+    }
+
+    const file = files[item.href];
+
+    return this.domParser.parseFromString(file, "application/xhtml+xml");
+  }
+
   public async extractChapters(files: EpubFiles, rootfile: Rootfile): Promise<Array<Chapter>> {
     const itemRefs = rootfile.spine.itemRefs;
     const idrefs = itemRefs.map(itemRefs => itemRefs.idref);

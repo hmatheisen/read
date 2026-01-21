@@ -1,4 +1,5 @@
-import { useState } from "react";
+import * as p from "path";
+import { useMemo, useState } from "react";
 
 import { Epub } from "lib/epub";
 
@@ -36,10 +37,27 @@ const EpubReader = ({ epub }: Props) => {
       chapter.endPage >= paginationInfo.currentPage,
   ) || { startPage: 0, endPage: 0, totalPages: 0 };
 
+  const currentChapterIndex = paginationInfo.chapterPages.indexOf(currentChapterPages);
+  const chapterName = useMemo(() => {
+    if (currentChapterIndex === -1) {
+      return null;
+    }
+
+    const currentChapterHref = epub.chapters[currentChapterIndex].href;
+    const anchors = epub.navDocument.querySelectorAll("a");
+    const chapterAnchor = Array.from(anchors).find(anchor => {
+      return p.basename(anchor.getAttribute("href")!) === p.basename(currentChapterHref);
+    });
+
+    return chapterAnchor?.textContent || null;
+  }, [currentChapterIndex]);
+
+  const headerText = chapterName === null ? epub.title : chapterName;
+
   return (
     <div className="pt-(--reader-top-padding) pb-(--reader-bottom-padding)">
       <div className="h-(--header-height) text-gray-400 text-sm flex items-center justify-center">
-        {epub.rootfile.metadata.title} - {epub.rootfile.metadata.creator}
+        {headerText}
       </div>
 
       <BookPagination setPaginationInfo={setPaginationInfo}>
