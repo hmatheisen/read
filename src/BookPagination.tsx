@@ -1,3 +1,4 @@
+import { animate } from "motion";
 import {
   type Dispatch,
   type MouseEventHandler,
@@ -9,7 +10,6 @@ import {
 } from "react";
 
 import type { PaginationInfo } from "./EpubReader";
-import { waitForScrollEnd } from "./helpers/waitFroScrollToEnd";
 
 type ComputedChapterPages = {
   startPage: number;
@@ -90,6 +90,24 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
     setPaginationInfo(info => ({ ...info, chapterPages }));
   };
 
+  const scrollTo = (div: HTMLDivElement, distance: number) =>
+    animate(div.scrollLeft, div.scrollLeft + distance, {
+      duration: 0.2,
+      ease: "easeInOut",
+      onUpdate: latest => {
+        div.scrollLeft = latest;
+      },
+    });
+
+  const scrollBy = (div: HTMLDivElement, distance: number) =>
+    animate(div.scrollLeft, distance, {
+      duration: 0.2,
+      ease: "easeInOut",
+      onUpdate: latest => {
+        div.scrollLeft = latest;
+      },
+    });
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage();
@@ -140,21 +158,31 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
       const clientX = e.changedTouches[0].clientX;
 
       if (clientX <= columnWidth / 3.0) {
-        divRef.current.scrollBy({ left: -columnWidth, behavior: "smooth" });
-        await waitForScrollEnd(divRef.current);
+        await scrollTo(divRef.current, -columnWidth);
       }
 
       if (clientX >= (columnWidth * 2) / 3.0) {
-        divRef.current.scrollBy({ left: columnWidth, behavior: "smooth" });
-        await waitForScrollEnd(divRef.current);
+        await scrollTo(divRef.current, columnWidth);
       }
     }
 
     const scrollLeft = divRef.current.scrollLeft;
-    const columnIndex = Math.round(scrollLeft / columnWidth);
-    const targetScrollLeft = columnIndex * columnWidth;
+    const velocityThreshold = 0.5;
 
-    divRef.current.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
+    let targetColumnIndex;
+    if (Math.abs(touchStateRef.current.vx) > velocityThreshold) {
+      // Fast swipe - move to next/prev page based on direction
+      const currentColumn = Math.round(scrollLeft / columnWidth);
+      targetColumnIndex = touchStateRef.current.vx > 0 ? currentColumn + 1 : currentColumn - 1;
+    } else {
+      // Slow drag - use a lower threshold (e.g., 30%)
+      const columnIndex = Math.floor(scrollLeft / columnWidth);
+      const remainder = scrollLeft % columnWidth;
+      targetColumnIndex = remainder > columnWidth * 0.3 ? columnIndex + 1 : columnIndex;
+    }
+
+    const targetScrollLeft = targetColumnIndex * columnWidth;
+    await scrollBy(divRef.current, targetScrollLeft);
     setCurrentPage();
   };
 
