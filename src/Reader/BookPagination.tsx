@@ -192,7 +192,11 @@ const BookPagination = ({ children, setPaginationInfo, toggleSettings }: Props) 
 
     const targetScrollLeft = targetColumnIndex * columnWidth;
     await scrollBy(divRef.current, targetScrollLeft);
+
+    // Maybe not needed?
     setCurrentPage();
+    setTotalPages();
+    computeChapterPages();
   };
 
   const onClick: MouseEventHandler<HTMLDivElement> = e => {

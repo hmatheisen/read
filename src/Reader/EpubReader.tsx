@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { SystemBars } from "@capacitor/core";
+import { useEffect, useMemo, useState } from "react";
 
 import { Epub } from "lib/epub";
 
@@ -51,6 +52,14 @@ const EpubReader = ({ epub }: Props) => {
   }, [currentChapterIndex, epub.chapters]);
 
   const headerText = chapterName === null ? epub.title : chapterName;
+
+  useEffect(() => {
+    if (isSettingsHidden) {
+      SystemBars.hide({});
+    } else {
+      SystemBars.show({});
+    }
+  }, [isSettingsHidden]);
 
   return (
     <div className="pt-(--reader-top-padding) pb-(--reader-bottom-padding) m-0 px-0">

@@ -10,13 +10,13 @@
   --font-mono: "Roboto", monospace;
   --header-height: calc(var(--spacing) * 5);
   --footer-height: calc(var(--spacing) * 5);
-  --reader-top-padding: calc(var(--spacing) * 12);
-  --reader-bottom-padding: calc(var(--spacing) * 5);
+  --reader-top-padding: 48px;
+  --reader-bottom-padding: 20px;
   --reader-height: calc(
     100dvh - var(--header-height) - var(--footer-height) - var(--reader-top-padding) -
       var(--reader-bottom-padding)
   );
-  --reader-x-padding: calc(var(--spacing) * 7);
+  --reader-x-padding: 28px;
   --reader-text-size: 12px;
   --reader-line-height: 1.2;
 }
