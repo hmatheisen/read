@@ -1,5 +1,5 @@
 import type JSZip from "jszip";
-import type { JSZipObject } from "jszip";
+import { type JSZipObject } from "jszip";
 import * as p from "path";
 
 import type { Chapter, EpubFiles, TOC } from "./epub";
@@ -149,9 +149,10 @@ class Parser {
     }
 
     // Create new computation
-    const promise = this.findFile(path, { from })
-      .async("blob")
-      .then(blob => {
+    try {
+      const file = this.findFile(path, { from });
+
+      const promise = file.async("blob").then(blob => {
         const url = URL.createObjectURL(blob);
 
         this.resourceURLs.set(path, url);
@@ -160,9 +161,17 @@ class Parser {
         return url;
       });
 
-    this.resourcePromises.set(path, promise);
+      this.resourcePromises.set(path, promise);
 
-    return promise;
+      return promise;
+    } catch (e) {
+      // File not found, this can happen
+      console.warn(`Resource file not found: ${path}`, e);
+      // We still set the resource so we don't search for it again
+      this.resourceURLs.set(path, "");
+
+      return "";
+    }
   }
 
   private parseVersion(packageEl: Element | null): string {
