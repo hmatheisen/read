@@ -8,7 +8,7 @@ import {
 
 import { Epub } from "lib/epub";
 
-import { Spinner } from "./Spinner";
+import { Spinner } from "components/Spinner";
 
 type Props = {
   setEpub: Dispatch<SetStateAction<Epub | null>>;

@@ -9,6 +9,7 @@ import {
   useRef,
 } from "react";
 
+import { useSettings } from "../context/settings";
 import type { PaginationInfo } from "./EpubReader";
 
 type ComputedChapterPages = {
@@ -32,11 +33,13 @@ const touchStateInit: TouchState = {
 type Props = {
   children: ReactNode;
   setPaginationInfo: Dispatch<SetStateAction<PaginationInfo>>;
+  toggleSettings: () => void;
 };
 
-const BookPagination = ({ children, setPaginationInfo }: Props) => {
+const BookPagination = ({ children, setPaginationInfo, toggleSettings }: Props) => {
   const touchStateRef = useRef(touchStateInit);
   const divRef = useRef<HTMLDivElement>(null);
+  const { settings } = useSettings();
 
   const setTotalPages = () => {
     if (!divRef.current) {
@@ -116,7 +119,7 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [children]);
+  }, [settings]);
 
   const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
     const touch = e.changedTouches[0];
@@ -156,12 +159,18 @@ const BookPagination = ({ children, setPaginationInfo }: Props) => {
     // Simple touch event
     if (touchStateRef.current.vx === 0) {
       const clientX = e.changedTouches[0].clientX;
+      const firstThird = columnWidth / 3.0;
+      const secondThird = (columnWidth * 2) / 3.0;
 
-      if (clientX <= columnWidth / 3.0) {
+      if (clientX <= firstThird) {
         await scrollTo(divRef.current, -columnWidth);
       }
 
-      if (clientX >= (columnWidth * 2) / 3.0) {
+      if (clientX >= firstThird && clientX <= secondThird) {
+        toggleSettings();
+      }
+
+      if (clientX >= secondThird) {
         await scrollTo(divRef.current, columnWidth);
       }
     }

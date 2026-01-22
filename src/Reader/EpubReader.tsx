@@ -4,6 +4,9 @@ import { Epub } from "lib/epub";
 
 import BookPagination from "./BookPagination";
 import Chapter from "./Chapter";
+import Footer from "./Footer";
+import Header from "./Header";
+import Settings from "./Settings/Settings";
 
 export type ComputedChapterPages = {
   startPage: number;
@@ -29,6 +32,8 @@ type Props = {
 
 const EpubReader = ({ epub }: Props) => {
   const [paginationInfo, setPaginationInfo] = useState(initPaginationInfo);
+  const [isSettingsHidden, setIsSettingsHidden] = useState(true);
+  const toggleSettings = () => setIsSettingsHidden(prev => !prev);
 
   const currentChapterPages = paginationInfo.chapterPages.find(
     chapter =>
@@ -49,22 +54,17 @@ const EpubReader = ({ epub }: Props) => {
 
   return (
     <div className="pt-(--reader-top-padding) pb-(--reader-bottom-padding) m-0 px-0">
-      <div className="h-(--header-height) text-gray-400 text-xs flex items-center justify-center">
-        <span>{headerText}</span>
-      </div>
+      <Header text={headerText} />
 
-      <BookPagination setPaginationInfo={setPaginationInfo}>
+      <BookPagination setPaginationInfo={setPaginationInfo} toggleSettings={toggleSettings}>
         {epub.chapters.map(chapter => (
           <Chapter key={chapter.id} content={chapter.content} />
         ))}
       </BookPagination>
 
-      <div className="h-(--footer-height) text-gray-400 text-xs flex items-center justify-around m-0 p-0">
-        <span>{`${paginationInfo.currentPage}/${paginationInfo.totalPages}`}</span>
-        <span>
-          {`${paginationInfo.currentPage - currentChapterPages.startPage}/${currentChapterPages.totalPages}`}
-        </span>
-      </div>
+      <Footer currentChapterPages={currentChapterPages} paginationInfo={paginationInfo} />
+
+      <Settings isSettingsHidden={isSettingsHidden} />
     </div>
   );
 };

@@ -3,7 +3,7 @@
   "tabWidth": 2,
   "arrowParens": "avoid",
   "plugins": ["@trivago/prettier-plugin-sort-imports"],
-  "importOrder": ["<THIRD_PARTY_MODULES>", "^src/(.*)$", "^lib/(.*)$", "^[./]"],
+  "importOrder": ["<THIRD_PARTY_MODULES>", "^src/(.*)$", "^lib/(.*)$", "^components/(.*)$", "^[./]"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true
 }
