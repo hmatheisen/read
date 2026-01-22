@@ -1,12 +1,21 @@
-import { type ChangeEventHandler, type Dispatch, type SetStateAction, useRef } from "react";
+import {
+  type ChangeEventHandler,
+  type Dispatch,
+  type SetStateAction,
+  useRef,
+  useState,
+} from "react";
 
 import { Epub } from "lib/epub";
+
+import { Spinner } from "./Spinner";
 
 type Props = {
   setEpub: Dispatch<SetStateAction<Epub | null>>;
 };
 
 const EpubInput = ({ setEpub }: Props) => {
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onFileUpload: ChangeEventHandler<HTMLInputElement> = async e => {
@@ -14,8 +23,9 @@ const EpubInput = ({ setEpub }: Props) => {
       console.error("no files selected");
       return;
     }
-
     const startTime = performance.now();
+
+    setIsLoading(true);
 
     const file = e.target.files[0];
     const bytes = await file.arrayBuffer();
@@ -25,6 +35,7 @@ const EpubInput = ({ setEpub }: Props) => {
     const endTime = performance.now();
     const duration = endTime - startTime;
 
+    setIsLoading(false);
     console.log(`Loaded epub in ${duration}ms`);
   };
 
@@ -34,21 +45,27 @@ const EpubInput = ({ setEpub }: Props) => {
 
   return (
     <div className="h-dvh w-dvw flex flex-col justify-center items-center">
-      <input
-        type="file"
-        ref={inputRef}
-        className="hidden"
-        id="epub-upload"
-        accept=".epub"
-        onChange={onFileUpload}
-      />
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <>
+          <input
+            type="file"
+            ref={inputRef}
+            className="hidden"
+            id="epub-upload"
+            accept=".epub"
+            onChange={onFileUpload}
+          />
 
-      <button
-        className="bg-black text-white dark:bg-white dark:text-black py-2 px-4 rounded"
-        onClick={onClick}
-      >
-        Select book
-      </button>
+          <button
+            className="bg-black text-white dark:bg-white dark:text-black py-2 px-4 rounded"
+            onClick={onClick}
+          >
+            Select book
+          </button>
+        </>
+      )}
     </div>
   );
 };

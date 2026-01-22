@@ -21,7 +21,6 @@
   --reader-line-height: 1.2;
 }
 
-/* this may be set by a book style */
 body {
   margin: 0 !important;
   padding: 0 !important;
