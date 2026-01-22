@@ -2,7 +2,7 @@ import type JSZip from "jszip";
 import type { JSZipObject } from "jszip";
 import * as p from "path";
 
-import type { Chapter, EpubFiles } from "./epub";
+import type { Chapter, EpubFiles, TOC } from "./epub";
 import type { Item, ItemRef, Manifest, Metadata, Rootfile, Spine } from "./types";
 
 class Parser {
@@ -31,12 +31,14 @@ class Parser {
     const rootfileContent = await rootfileZipObject.async("string");
     const rootfileXml = this.domParser.parseFromString(rootfileContent, "application/xml");
 
+    const packageEl = rootfileXml.querySelector("package");
     const metadataEl = rootfileXml.querySelector("metadata");
     const manifestEl = rootfileXml.querySelector("manifest");
     const spineEl = rootfileXml.querySelector("spine");
 
     const rootfile: Rootfile = {
       name: rootfileZipObject.name,
+      version: this.parseVersion(packageEl),
       metadata: this.parseMetadata(metadataEl),
       manifest: this.parseManifest(manifestEl),
       spine: this.parseSpine(spineEl),
@@ -75,15 +77,25 @@ class Parser {
     return files;
   }
 
-  public findNavDocument(files: EpubFiles, rootfile: Rootfile): Document {
-    const item = rootfile.manifest.items.find(item => item.properties === "nav");
-    if (!item) {
-      throw new Error("No nav document found");
+  public findTocDocument(files: EpubFiles, rootfile: Rootfile): TOC {
+    const navItem = rootfile.manifest.items.find(item => item.properties === "nav");
+    const ncxItem = rootfile.manifest.items.find(item => item.id === rootfile.spine.toc);
+
+    if (navItem) {
+      const file = files[navItem.href];
+      const document = this.domParser.parseFromString(file, "application/xhtml+xml");
+
+      return { type: "nav", document };
     }
 
-    const file = files[item.href];
+    if (ncxItem) {
+      const file = files[ncxItem.href];
+      const document = this.domParser.parseFromString(file, "application/xml");
 
-    return this.domParser.parseFromString(file, "application/xhtml+xml");
+      return { type: "ncx", document };
+    }
+
+    throw new Error("No toc found");
   }
 
   public async extractChapters(files: EpubFiles, rootfile: Rootfile): Promise<Array<Chapter>> {
@@ -106,12 +118,20 @@ class Parser {
       link.setAttribute("href", stylesheetUrl);
     }
 
-    const images = doc.querySelectorAll("img");
-    for (const img of images) {
-      const imagePath = img.getAttribute("src")!;
+    const imgs = doc.querySelectorAll("img");
+    for (const img of imgs) {
+      const imgPath = img.getAttribute("src")!;
+      const imgUrl = await this.getResourceUrl(imgPath, from);
+
+      img.setAttribute("src", imgUrl);
+    }
+
+    const images = doc.querySelectorAll("image");
+    for (const image of images) {
+      const imagePath = image.getAttribute("xlink:href")!;
       const imageUrl = await this.getResourceUrl(imagePath, from);
 
-      img.setAttribute("src", imageUrl);
+      image.setAttribute("xlink:href", imageUrl);
     }
 
     return this.xmlSerializer.serializeToString(doc);
@@ -145,6 +165,19 @@ class Parser {
     return promise;
   }
 
+  private parseVersion(packageEl: Element | null): string {
+    if (!packageEl) {
+      throw new Error("package element not found");
+    }
+
+    const version = packageEl.getAttribute("version");
+    if (!version) {
+      throw new Error("no version attribute");
+    }
+
+    return version;
+  }
+
   private parseSpine(spineEl: Element | null): Spine {
     if (!spineEl) {
       throw new Error("spine element not found");
@@ -167,7 +200,9 @@ class Parser {
       itemRefs.push({ idref, id, linear, properties });
     });
 
-    return { itemRefs: itemRefs } as Spine;
+    const toc = spineEl.getAttribute("toc");
+
+    return { itemRefs, toc } as Spine;
   }
 
   private parseManifest(manifestEl: Element | null): Manifest {

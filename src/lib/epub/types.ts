@@ -38,10 +38,12 @@ export type ItemRef = {
 
 export type Spine = {
   itemRefs: Array<ItemRef>;
+  toc: string | null;
 };
 
 export type Rootfile = {
   name: string;
+  version: string;
   manifest: Manifest;
   metadata: Metadata;
   spine: Spine;

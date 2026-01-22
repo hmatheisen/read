@@ -8,9 +8,9 @@
 @theme {
   --font-serif: "Literata", serif;
   --font-mono: "Roboto", monospace;
-  --header-height: calc(var(--spacing) * 8);
-  --footer-height: calc(var(--spacing) * 8);
-  --reader-top-padding: calc(var(--spacing) * 10);
+  --header-height: calc(var(--spacing) * 5);
+  --footer-height: calc(var(--spacing) * 5);
+  --reader-top-padding: calc(var(--spacing) * 12);
   --reader-bottom-padding: calc(var(--spacing) * 5);
   --reader-height: calc(
     100dvh - var(--header-height) - var(--footer-height) - var(--reader-top-padding) -
@@ -19,6 +19,14 @@
   --reader-x-padding: calc(var(--spacing) * 7);
   --reader-text-size: 12px;
   --reader-line-height: 1.2;
+}
+
+/* this may be set by a book style */
+body,
+div {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: "hidden" !important;
 }
 
 img {

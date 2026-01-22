@@ -1,4 +1,3 @@
-import * as p from "path";
 import { useMemo, useState } from "react";
 
 import { Epub } from "lib/epub";
@@ -43,21 +42,15 @@ const EpubReader = ({ epub }: Props) => {
       return null;
     }
 
-    const currentChapterHref = epub.chapters[currentChapterIndex].href;
-    const anchors = epub.navDocument.querySelectorAll("a");
-    const chapterAnchor = Array.from(anchors).find(anchor => {
-      return p.basename(anchor.getAttribute("href")!) === p.basename(currentChapterHref);
-    });
-
-    return chapterAnchor?.textContent || null;
-  }, [currentChapterIndex]);
+    return epub.findChapterTitle(epub.chapters[currentChapterIndex]);
+  }, [currentChapterIndex, epub.chapters]);
 
   const headerText = chapterName === null ? epub.title : chapterName;
 
   return (
     <div className="pt-(--reader-top-padding) pb-(--reader-bottom-padding)">
-      <div className="h-(--header-height) text-gray-400 text-sm flex items-center justify-center">
-        {headerText}
+      <div className="h-(--header-height) text-gray-400 text-xs flex items-center justify-center">
+        <span>{headerText}</span>
       </div>
 
       <BookPagination setPaginationInfo={setPaginationInfo}>
@@ -66,7 +59,7 @@ const EpubReader = ({ epub }: Props) => {
         ))}
       </BookPagination>
 
-      <div className="h-(--footer-height) text-gray-400 text-sm flex items-center justify-around">
+      <div className="h-(--footer-height) text-gray-400 text-xs flex items-center justify-around">
         <span>{`${paginationInfo.currentPage}/${paginationInfo.totalPages}`}</span>
         <span>
           {`${paginationInfo.currentPage - currentChapterPages.startPage}/${currentChapterPages.totalPages}`}
