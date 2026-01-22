@@ -48,7 +48,7 @@ const EpubReader = ({ epub }: Props) => {
   const headerText = chapterName === null ? epub.title : chapterName;
 
   return (
-    <div className="pt-(--reader-top-padding) pb-(--reader-bottom-padding)">
+    <div className="pt-(--reader-top-padding) pb-(--reader-bottom-padding) m-0 px-0">
       <div className="h-(--header-height) text-gray-400 text-xs flex items-center justify-center">
         <span>{headerText}</span>
       </div>
@@ -59,7 +59,7 @@ const EpubReader = ({ epub }: Props) => {
         ))}
       </BookPagination>
 
-      <div className="h-(--footer-height) text-gray-400 text-xs flex items-center justify-around">
+      <div className="h-(--footer-height) text-gray-400 text-xs flex items-center justify-around m-0 p-0">
         <span>{`${paginationInfo.currentPage}/${paginationInfo.totalPages}`}</span>
         <span>
           {`${paginationInfo.currentPage - currentChapterPages.startPage}/${currentChapterPages.totalPages}`}

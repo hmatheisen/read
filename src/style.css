@@ -22,11 +22,10 @@
 }
 
 /* this may be set by a book style */
-body,
-div {
+body {
   margin: 0 !important;
   padding: 0 !important;
-  overflow: "hidden" !important;
+  overflow: hidden !important;
 }
 
 img {

@@ -20,7 +20,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <ThemeContext value={{ theme, toggleTheme }}>
-      <div className="bg-white text-black dark:bg-black dark:text-white">{children}</div>
+      <div className="bg-white text-black dark:bg-black dark:text-white m-0 p-0">{children}</div>
     </ThemeContext>
   );
 };

@@ -279,7 +279,7 @@ class Parser {
     const mandatoryAttribtues = ["dc:identifier", "dc:language", "dc:title"];
     mandatoryAttribtues.forEach(attr => {
       if (attributes[attr] === null) {
-        throw new Error(`Mandatory attribute ${attr} is missing`);
+        console.warn(`Mandatory attribute ${attr} is missing`);
       }
     });
 
