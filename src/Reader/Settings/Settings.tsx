@@ -2,9 +2,14 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { MdFontDownload, MdOutlineHeight, MdPadding } from "react-icons/md";
 
+import RangeInput from "components/RangeInput";
+
 import { useSettings } from "../../context/settings";
 import useDebounce from "../../hooks/useDebounce";
 import SettingsBar from "./SettingsBar";
+
+const stringToPx = (px: string) => `${px}px`;
+const pxToString = (string: string) => string.slice(0, -2);
 
 type Props = {
   isSettingsHidden: boolean;
@@ -16,12 +21,10 @@ const Settings = ({ isSettingsHidden }: Props) => {
   const { settings, setSettings } = useSettings();
 
   const [selectedSetting, setSelectedSetting] = useState<SelectedSetting | null>(null);
-  const toggleTextResize = () =>
-    setSelectedSetting(prev => (prev !== "reader-text-size" ? "reader-text-size" : null));
-  const toggleLineHeightResize = () =>
-    setSelectedSetting(prev => (prev !== "reader-line-height" ? "reader-line-height" : null));
-  const toggleReaderPadding = () =>
-    setSelectedSetting(prev => (prev !== "reader-padding" ? "reader-padding" : null));
+
+  const toggleSettings = (setting: SelectedSetting) => () => {
+    setSelectedSetting(prev => (prev !== setting ? setting : null));
+  };
 
   const [inputSettings, setInputSettings] = useState(settings);
   const debouncedSettings = useDebounce(inputSettings, 1000);
@@ -46,7 +49,7 @@ const Settings = ({ isSettingsHidden }: Props) => {
               ? "var(--color-white)"
               : "var(--color-neutral-500)"
           }
-          onClick={toggleTextResize}
+          onClick={toggleSettings("reader-text-size")}
           className="text-3xl"
         />
         <MdOutlineHeight
@@ -55,14 +58,14 @@ const Settings = ({ isSettingsHidden }: Props) => {
               ? "var(--color-white)"
               : "var(--color-neutral-500)"
           }
-          onClick={toggleLineHeightResize}
+          onClick={toggleSettings("reader-line-height")}
           className="text-3xl"
         />
         <MdPadding
           color={
             selectedSetting === "reader-padding" ? "var(--color-white)" : "var(--color-neutral-500)"
           }
-          onClick={toggleReaderPadding}
+          onClick={toggleSettings("reader-padding")}
           className="text-3xl"
         />
       </div>
@@ -80,14 +83,13 @@ const Settings = ({ isSettingsHidden }: Props) => {
             {selectedSetting === "reader-text-size" && (
               <div className="flex flex-col w-full items-center mt-3">
                 <span>{inputSettings.readerTextSize}</span>
-                <input
+                <RangeInput
                   className="w-3/4 p-3"
-                  type="range"
                   min={5}
                   max={30}
-                  value={inputSettings.readerTextSize.slice(0, -2)}
-                  onChange={e =>
-                    setInputSettings({ ...inputSettings, readerTextSize: `${e.target.value}px` })
+                  value={pxToString(inputSettings.readerTextSize)}
+                  onChange={value =>
+                    setInputSettings({ ...inputSettings, readerTextSize: stringToPx(value) })
                   }
                 />
               </div>
@@ -96,15 +98,14 @@ const Settings = ({ isSettingsHidden }: Props) => {
             {selectedSetting === "reader-line-height" && (
               <div className="flex flex-col w-full items-center mt-3">
                 <span>{inputSettings.readerLineHeight}</span>
-                <input
+                <RangeInput
                   className="w-3/4 p-3"
-                  type="range"
                   min={0}
                   max={5}
                   step={0.1}
-                  value={inputSettings.readerLineHeight}
-                  onChange={e =>
-                    setInputSettings({ ...inputSettings, readerLineHeight: e.target.value })
+                  value={pxToString(inputSettings.readerLineHeight)}
+                  onChange={value =>
+                    setInputSettings({ ...inputSettings, readerLineHeight: stringToPx(value) })
                   }
                 />
               </div>
@@ -113,44 +114,41 @@ const Settings = ({ isSettingsHidden }: Props) => {
             {selectedSetting === "reader-padding" && (
               <div className="flex flex-col w-full items-center mt-3">
                 <span>Top padding: {inputSettings.readerTopPadding}</span>
-                <input
+                <RangeInput
                   className="w-3/4 p-3"
-                  type="range"
                   min={1}
                   max={100}
                   step={1}
-                  value={inputSettings.readerTopPadding.slice(0, -2)}
-                  onChange={e =>
-                    setInputSettings({ ...inputSettings, readerTopPadding: `${e.target.value}px` })
+                  value={pxToString(inputSettings.readerTopPadding)}
+                  onChange={value =>
+                    setInputSettings({ ...inputSettings, readerTopPadding: stringToPx(value) })
                   }
                 />
 
                 <span>Bottom padding: {inputSettings.readerBottomPadding}</span>
-                <input
+                <RangeInput
                   className="w-3/4 p-3"
-                  type="range"
                   min={1}
                   max={100}
                   step={1}
-                  value={inputSettings.readerBottomPadding.slice(0, -2)}
-                  onChange={e =>
+                  value={pxToString(inputSettings.readerBottomPadding)}
+                  onChange={value =>
                     setInputSettings({
                       ...inputSettings,
-                      readerBottomPadding: `${e.target.value}px`,
+                      readerBottomPadding: stringToPx(value),
                     })
                   }
                 />
 
                 <span>X padding: {inputSettings.readerXPadding}</span>
-                <input
+                <RangeInput
                   className="w-3/4 p-3"
-                  type="range"
                   min={1}
                   max={100}
                   step={1}
-                  value={inputSettings.readerXPadding.slice(0, -2)}
-                  onChange={e =>
-                    setInputSettings({ ...inputSettings, readerXPadding: `${e.target.value}px` })
+                  value={pxToString(inputSettings.readerXPadding)}
+                  onChange={value =>
+                    setInputSettings({ ...inputSettings, readerXPadding: stringToPx(value) })
                   }
                 />
               </div>
