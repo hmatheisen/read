@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { MdFontDownload, MdOutlineHeight, MdPadding } from "react-icons/md";
 
 import RangeInput from "components/RangeInput";
@@ -11,16 +11,16 @@ import SettingsBar from "./SettingsBar";
 const stringToPx = (px: string) => `${px}px`;
 const pxToString = (string: string) => string.slice(0, -2);
 
+export type SelectedSetting = "reader-text-size" | "reader-padding" | "reader-line-height";
+
 type Props = {
   isSettingsHidden: boolean;
+  selectedSetting: SelectedSetting | null;
+  setSelectedSetting: Dispatch<SetStateAction<SelectedSetting | null>>;
 };
 
-type SelectedSetting = "reader-text-size" | "reader-padding" | "reader-line-height";
-
-const Settings = ({ isSettingsHidden }: Props) => {
+const Settings = ({ isSettingsHidden, selectedSetting, setSelectedSetting }: Props) => {
   const { settings, setSettings } = useSettings();
-
-  const [selectedSetting, setSelectedSetting] = useState<SelectedSetting | null>(null);
 
   const toggleSettings = (setting: SelectedSetting) => () => {
     setSelectedSetting(prev => (prev !== setting ? setting : null));
@@ -32,13 +32,6 @@ const Settings = ({ isSettingsHidden }: Props) => {
   useEffect(() => {
     setSettings(debouncedSettings);
   }, [debouncedSettings]);
-
-  useEffect(() => {
-    if (isSettingsHidden) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
-      setSelectedSetting(null);
-    }
-  }, [isSettingsHidden]);
 
   return (
     <SettingsBar isHidden={isSettingsHidden}>

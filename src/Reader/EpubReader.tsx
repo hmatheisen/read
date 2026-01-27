@@ -7,7 +7,7 @@ import BookPagination from "./BookPagination";
 import Chapter from "./Chapter";
 import Footer from "./Footer";
 import Header from "./Header";
-import Settings from "./Settings/Settings";
+import Settings, { type SelectedSetting } from "./Settings/Settings";
 
 export type ComputedChapterPages = {
   startPage: number;
@@ -34,7 +34,15 @@ type Props = {
 const EpubReader = ({ epub }: Props) => {
   const [paginationInfo, setPaginationInfo] = useState(initPaginationInfo);
   const [isSettingsHidden, setIsSettingsHidden] = useState(true);
-  const toggleSettings = () => setIsSettingsHidden(prev => !prev);
+  const [selectedSetting, setSelectedSetting] = useState<SelectedSetting | null>(null);
+  const toggleSettings = () =>
+    setIsSettingsHidden(prev => {
+      const next = !prev;
+      if (next) {
+        setSelectedSetting(null);
+      }
+      return next;
+    });
 
   const currentChapterPages = paginationInfo.chapterPages.find(
     chapter =>
@@ -73,7 +81,11 @@ const EpubReader = ({ epub }: Props) => {
 
       <Footer currentChapterPages={currentChapterPages} paginationInfo={paginationInfo} />
 
-      <Settings isSettingsHidden={isSettingsHidden} />
+      <Settings
+        isSettingsHidden={isSettingsHidden}
+        selectedSetting={selectedSetting}
+        setSelectedSetting={setSelectedSetting}
+      />
     </div>
   );
 };
