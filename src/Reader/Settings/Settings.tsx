@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "motion/react";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { MdFontDownload, MdOutlineHeight, MdPadding } from "react-icons/md";
 
@@ -63,92 +62,79 @@ const Settings = ({ isSettingsHidden, selectedSetting, setSelectedSetting }: Pro
         />
       </div>
 
-      <AnimatePresence>
-        {selectedSetting !== null && (
-          <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: "auto" }}
-            exit={{ height: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="overflow-hidden"
-            layout
-          >
-            {selectedSetting === "reader-text-size" && (
-              <div className="flex flex-col w-full items-center mt-3">
-                <span>{inputSettings.readerTextSize}</span>
-                <RangeInput
-                  className="w-3/4 p-3"
-                  min={5}
-                  max={30}
-                  value={pxToString(inputSettings.readerTextSize)}
-                  onChange={value =>
-                    setInputSettings({ ...inputSettings, readerTextSize: stringToPx(value) })
-                  }
-                />
-              </div>
-            )}
+      {selectedSetting === "reader-text-size" && (
+        <div className="flex flex-col w-full items-center mt-3">
+          <span>{inputSettings.readerTextSize}</span>
+          <RangeInput
+            className="w-3/4 p-3"
+            min={5}
+            max={30}
+            value={pxToString(inputSettings.readerTextSize)}
+            onChange={value =>
+              setInputSettings({ ...inputSettings, readerTextSize: stringToPx(value) })
+            }
+          />
+        </div>
+      )}
 
-            {selectedSetting === "reader-line-height" && (
-              <div className="flex flex-col w-full items-center mt-3">
-                <span>{inputSettings.readerLineHeight}</span>
-                <RangeInput
-                  className="w-3/4 p-3"
-                  min={0}
-                  max={5}
-                  step={0.1}
-                  value={pxToString(inputSettings.readerLineHeight)}
-                  onChange={value =>
-                    setInputSettings({ ...inputSettings, readerLineHeight: stringToPx(value) })
-                  }
-                />
-              </div>
-            )}
+      {selectedSetting === "reader-line-height" && (
+        <div className="flex flex-col w-full items-center mt-3">
+          <span>{inputSettings.readerLineHeight}</span>
+          <RangeInput
+            className="w-3/4 p-3"
+            min={0}
+            max={5}
+            step={0.1}
+            value={pxToString(inputSettings.readerLineHeight)}
+            onChange={value =>
+              setInputSettings({ ...inputSettings, readerLineHeight: stringToPx(value) })
+            }
+          />
+        </div>
+      )}
 
-            {selectedSetting === "reader-padding" && (
-              <div className="flex flex-col w-full items-center mt-3">
-                <span>Top padding: {inputSettings.readerTopPadding}</span>
-                <RangeInput
-                  className="w-3/4 p-3"
-                  min={1}
-                  max={100}
-                  step={1}
-                  value={pxToString(inputSettings.readerTopPadding)}
-                  onChange={value =>
-                    setInputSettings({ ...inputSettings, readerTopPadding: stringToPx(value) })
-                  }
-                />
+      {selectedSetting === "reader-padding" && (
+        <div className="flex flex-col w-full items-center mt-3">
+          <span>Top padding: {inputSettings.readerTopPadding}</span>
+          <RangeInput
+            className="w-3/4 p-3"
+            min={1}
+            max={100}
+            step={1}
+            value={pxToString(inputSettings.readerTopPadding)}
+            onChange={value =>
+              setInputSettings({ ...inputSettings, readerTopPadding: stringToPx(value) })
+            }
+          />
 
-                <span>Bottom padding: {inputSettings.readerBottomPadding}</span>
-                <RangeInput
-                  className="w-3/4 p-3"
-                  min={1}
-                  max={100}
-                  step={1}
-                  value={pxToString(inputSettings.readerBottomPadding)}
-                  onChange={value =>
-                    setInputSettings({
-                      ...inputSettings,
-                      readerBottomPadding: stringToPx(value),
-                    })
-                  }
-                />
+          <span>Bottom padding: {inputSettings.readerBottomPadding}</span>
+          <RangeInput
+            className="w-3/4 p-3"
+            min={1}
+            max={100}
+            step={1}
+            value={pxToString(inputSettings.readerBottomPadding)}
+            onChange={value =>
+              setInputSettings({
+                ...inputSettings,
+                readerBottomPadding: stringToPx(value),
+              })
+            }
+          />
 
-                <span>X padding: {inputSettings.readerXPadding}</span>
-                <RangeInput
-                  className="w-3/4 p-3"
-                  min={1}
-                  max={100}
-                  step={1}
-                  value={pxToString(inputSettings.readerXPadding)}
-                  onChange={value =>
-                    setInputSettings({ ...inputSettings, readerXPadding: stringToPx(value) })
-                  }
-                />
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <span>X padding: {inputSettings.readerXPadding}</span>
+          <RangeInput
+            className="w-3/4 p-3"
+            min={1}
+            max={100}
+            step={1}
+            value={pxToString(inputSettings.readerXPadding)}
+            onChange={value =>
+              setInputSettings({ ...inputSettings, readerXPadding: stringToPx(value) })
+            }
+          />
+        </div>
+      )}
     </SettingsBar>
   );
 };
