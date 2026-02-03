@@ -21,12 +21,14 @@ type ComputedChapterPages = {
 type TouchState = {
   x: number;
   vx: number;
+  scrollLeft: number;
   time: number;
 };
 
 const touchStateInit: TouchState = {
   x: 0,
   vx: 0,
+  scrollLeft: 0,
   time: 0,
 };
 
@@ -93,7 +95,7 @@ const BookPagination = ({ children, setPaginationInfo, toggleSettings }: Props) 
     setPaginationInfo(info => ({ ...info, chapterPages }));
   };
 
-  const scrollTo = (div: HTMLDivElement, distance: number) =>
+  const scrollBy = (div: HTMLDivElement, distance: number) =>
     animate(div.scrollLeft, div.scrollLeft + distance, {
       duration: 0.2,
       ease: "easeInOut",
@@ -102,7 +104,7 @@ const BookPagination = ({ children, setPaginationInfo, toggleSettings }: Props) 
       },
     });
 
-  const scrollBy = (div: HTMLDivElement, distance: number) =>
+  const scrollTo = (div: HTMLDivElement, distance: number) =>
     animate(div.scrollLeft, distance, {
       duration: 0.2,
       ease: "easeInOut",
@@ -110,6 +112,15 @@ const BookPagination = ({ children, setPaginationInfo, toggleSettings }: Props) 
         div.scrollLeft = latest;
       },
     });
+
+  const snap = (div: HTMLDivElement) => {
+    const columnWidth = div.clientWidth;
+    const scrollLeft = div.scrollLeft;
+    const columnIndex = Math.round(scrollLeft / columnWidth);
+    const targetScrollLeft = columnIndex * columnWidth;
+
+    return scrollTo(div, targetScrollLeft);
+  };
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -126,6 +137,7 @@ const BookPagination = ({ children, setPaginationInfo, toggleSettings }: Props) 
     const newTouchState: TouchState = {
       x: touch.screenX,
       vx: 0,
+      scrollLeft: divRef.current?.scrollLeft || 0,
       time: e.timeStamp,
     };
 
@@ -163,7 +175,7 @@ const BookPagination = ({ children, setPaginationInfo, toggleSettings }: Props) 
       const secondThird = (columnWidth * 2) / 3.0;
 
       if (clientX <= firstThird) {
-        await scrollTo(divRef.current, -columnWidth);
+        await scrollBy(divRef.current, -columnWidth);
       }
 
       if (clientX >= firstThird && clientX <= secondThird) {
@@ -171,32 +183,21 @@ const BookPagination = ({ children, setPaginationInfo, toggleSettings }: Props) 
       }
 
       if (clientX >= secondThird) {
-        await scrollTo(divRef.current, columnWidth);
+        await scrollBy(divRef.current, columnWidth);
       }
     }
 
-    const scrollLeft = divRef.current.scrollLeft;
-    const velocityThreshold = 0.5;
-
-    let targetColumnIndex;
-    if (Math.abs(touchStateRef.current.vx) > velocityThreshold) {
-      // Fast swipe - move to next/prev page based on direction
-      const currentColumn = Math.round(scrollLeft / columnWidth);
-      targetColumnIndex = touchStateRef.current.vx > 0 ? currentColumn + 1 : currentColumn - 1;
-    } else {
-      // Slow drag - use a lower threshold (e.g., 30%)
-      const columnIndex = Math.floor(scrollLeft / columnWidth);
-      const remainder = scrollLeft % columnWidth;
-      targetColumnIndex = remainder > columnWidth * 0.3 ? columnIndex + 1 : columnIndex;
+    // third of a page page scroll
+    const scrollLeftDiff = divRef.current.scrollLeft - touchStateRef.current.scrollLeft;
+    const abs = Math.abs(scrollLeftDiff);
+    const sign = scrollLeftDiff / abs;
+    if (abs > columnWidth * 0.2) {
+      await scrollBy(divRef.current, sign * columnWidth - scrollLeftDiff);
     }
 
-    const targetScrollLeft = targetColumnIndex * columnWidth;
-    await scrollBy(divRef.current, targetScrollLeft);
-
-    // Maybe not needed?
+    // snap current page to make sure we stay centered
+    await snap(divRef.current);
     setCurrentPage();
-    setTotalPages();
-    computeChapterPages();
   };
 
   const onClick: MouseEventHandler<HTMLDivElement> = e => {
