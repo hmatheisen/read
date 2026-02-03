@@ -8,7 +8,9 @@ export default defineConfig({
   resolve: {
     alias: {
       lib: "/src/lib",
-      components: "/src/components"
+      components: "/src/components",
+      hooks: "/src/hooks",
+      context: "/src/context",
     },
   },
   plugins: [

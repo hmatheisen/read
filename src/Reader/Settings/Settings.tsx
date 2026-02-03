@@ -1,10 +1,10 @@
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useState, useEffect } from "react";
 import { MdFontDownload, MdOutlineHeight, MdPadding } from "react-icons/md";
 
 import RangeInput from "components/RangeInput";
 
-import { useSettings } from "../../context/settings";
-import useDebounce from "../../hooks/useDebounce";
+import { useSettings } from "context/settings";
+import useDebounce from "hooks/useDebounce";
 import SettingsBar from "./SettingsBar";
 
 const stringToPx = (px: string) => `${px}px`;
@@ -20,7 +20,6 @@ type Props = {
 
 const Settings = ({ isSettingsHidden, selectedSetting, setSelectedSetting }: Props) => {
   const { settings, setSettings } = useSettings();
-
   const toggleSettings = (setting: SelectedSetting) => () => {
     setSelectedSetting(prev => (prev !== setting ? setting : null));
   };
@@ -30,7 +29,7 @@ const Settings = ({ isSettingsHidden, selectedSetting, setSelectedSetting }: Pro
 
   useEffect(() => {
     setSettings(debouncedSettings);
-  }, [debouncedSettings]);
+  }, [debouncedSettings])
 
   return (
     <SettingsBar isHidden={isSettingsHidden}>
@@ -85,9 +84,9 @@ const Settings = ({ isSettingsHidden, selectedSetting, setSelectedSetting }: Pro
             min={0}
             max={5}
             step={0.1}
-            value={pxToString(inputSettings.readerLineHeight)}
+            value={inputSettings.readerLineHeight}
             onChange={value =>
-              setInputSettings({ ...inputSettings, readerLineHeight: stringToPx(value) })
+              setInputSettings({ ...inputSettings, readerLineHeight: value })
             }
           />
         </div>
