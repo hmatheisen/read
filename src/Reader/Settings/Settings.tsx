@@ -1,16 +1,43 @@
-import { type Dispatch, type SetStateAction, useState, useEffect } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { type Dispatch, type ReactNode, type SetStateAction, useEffect, useState } from "react";
 import { MdFontDownload, MdOutlineHeight, MdPadding } from "react-icons/md";
-
-import RangeInput from "components/RangeInput";
 
 import { useSettings } from "context/settings";
 import useDebounce from "hooks/useDebounce";
+
+import RangeInput from "components/RangeInput";
+
 import SettingsBar from "./SettingsBar";
 
 const stringToPx = (px: string) => `${px}px`;
 const pxToString = (string: string) => string.slice(0, -2);
 
 export type SelectedSetting = "reader-text-size" | "reader-padding" | "reader-line-height";
+
+type SubBarProps = {
+  setting: SelectedSetting;
+  isSelected?: boolean;
+  children: ReactNode;
+};
+
+const SubBar = ({ setting, isSelected = false, children }: SubBarProps) => {
+  return (
+    <AnimatePresence>
+      {isSelected && (
+        <motion.div
+          key={setting}
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+          className="flex flex-col w-full items-center mt-3"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 type Props = {
   isSettingsHidden: boolean;
@@ -29,7 +56,7 @@ const Settings = ({ isSettingsHidden, selectedSetting, setSelectedSetting }: Pro
 
   useEffect(() => {
     setSettings(debouncedSettings);
-  }, [debouncedSettings])
+  }, [debouncedSettings]);
 
   return (
     <SettingsBar isHidden={isSettingsHidden}>
@@ -61,79 +88,66 @@ const Settings = ({ isSettingsHidden, selectedSetting, setSelectedSetting }: Pro
         />
       </div>
 
-      {selectedSetting === "reader-text-size" && (
-        <div className="flex flex-col w-full items-center mt-3">
-          <span>{inputSettings.readerTextSize}</span>
-          <RangeInput
-            className="w-3/4 p-3"
-            min={5}
-            max={30}
-            value={pxToString(inputSettings.readerTextSize)}
-            onChange={value =>
-              setInputSettings({ ...inputSettings, readerTextSize: stringToPx(value) })
-            }
-          />
-        </div>
-      )}
+      <SubBar setting="reader-text-size" isSelected={selectedSetting === "reader-text-size"}>
+        <span>{inputSettings.readerTextSize}</span>
+        <RangeInput
+          className="w-3/4"
+          min={5}
+          max={30}
+          value={pxToString(inputSettings.readerTextSize)}
+          onChange={value =>
+            setInputSettings({ ...inputSettings, readerTextSize: stringToPx(value) })
+          }
+        />
+      </SubBar>
 
-      {selectedSetting === "reader-line-height" && (
-        <div className="flex flex-col w-full items-center mt-3">
-          <span>{inputSettings.readerLineHeight}</span>
-          <RangeInput
-            className="w-3/4 p-3"
-            min={0}
-            max={5}
-            step={0.1}
-            value={inputSettings.readerLineHeight}
-            onChange={value =>
-              setInputSettings({ ...inputSettings, readerLineHeight: value })
-            }
-          />
-        </div>
-      )}
+      <SubBar setting="reader-line-height" isSelected={selectedSetting === "reader-line-height"}>
+        <span>{inputSettings.readerLineHeight}</span>
+        <RangeInput
+          className="w-3/4"
+          min={0}
+          max={5}
+          step={0.1}
+          value={inputSettings.readerLineHeight}
+          onChange={value => setInputSettings({ ...inputSettings, readerLineHeight: value })}
+        />
+      </SubBar>
 
-      {selectedSetting === "reader-padding" && (
-        <div className="flex flex-col w-full items-center mt-3">
-          <span>Top padding: {inputSettings.readerTopPadding}</span>
-          <RangeInput
-            className="w-3/4 p-3"
-            min={1}
-            max={100}
-            step={1}
-            value={pxToString(inputSettings.readerTopPadding)}
-            onChange={value =>
-              setInputSettings({ ...inputSettings, readerTopPadding: stringToPx(value) })
-            }
-          />
-
-          <span>Bottom padding: {inputSettings.readerBottomPadding}</span>
-          <RangeInput
-            className="w-3/4 p-3"
-            min={1}
-            max={100}
-            step={1}
-            value={pxToString(inputSettings.readerBottomPadding)}
-            onChange={value =>
-              setInputSettings({
-                ...inputSettings,
-                readerBottomPadding: stringToPx(value),
-              })
-            }
-          />
-
-          <span>X padding: {inputSettings.readerXPadding}</span>
-          <RangeInput
-            className="w-3/4 p-3"
-            min={1}
-            max={100}
-            step={1}
-            value={pxToString(inputSettings.readerXPadding)}
-            onChange={value =>
-              setInputSettings({ ...inputSettings, readerXPadding: stringToPx(value) })
-            }
-          />
-        </div>
-      )}
+      <SubBar setting="reader-padding" isSelected={selectedSetting === "reader-padding"}>
+        <span>{inputSettings.readerTopPadding}</span>
+        <RangeInput
+          className="w-3/4"
+          min={1}
+          max={100}
+          step={1}
+          value={pxToString(inputSettings.readerTopPadding)}
+          onChange={value =>
+            setInputSettings({ ...inputSettings, readerTopPadding: stringToPx(value) })
+          }
+        />
+        <span>{inputSettings.readerBottomPadding}</span>
+        <RangeInput
+          className="w-3/4"
+          min={1}
+          max={100}
+          step={1}
+          value={pxToString(inputSettings.readerBottomPadding)}
+          onChange={value =>
+            setInputSettings({ ...inputSettings, readerBottomPadding: stringToPx(value) })
+          }
+        />
+        <span>{inputSettings.readerXPadding}</span>
+        <RangeInput
+          className="w-3/4"
+          min={1}
+          max={100}
+          step={1}
+          value={pxToString(inputSettings.readerXPadding)}
+          onChange={value =>
+            setInputSettings({ ...inputSettings, readerXPadding: stringToPx(value) })
+          }
+        />
+      </SubBar>
     </SettingsBar>
   );
 };

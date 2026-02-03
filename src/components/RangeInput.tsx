@@ -10,7 +10,7 @@ type Props = {
 const RangeInput = ({ value, onChange, min, max, step = 1, className }: Props) => {
   return (
     <input
-      className={className}
+      className={`h-2 my-3 bg-neutral-800 rounded-full appearance-none cursor-pointer ${className}`}
       type="range"
       min={min}
       max={max}
