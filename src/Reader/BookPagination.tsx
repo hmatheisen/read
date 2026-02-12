@@ -166,6 +166,15 @@ const BookPagination = ({ children, setPaginationInfo, toggleSettings }: Props) 
       return;
     }
 
+    // const elementsToTest = document.querySelectorAll("p");
+    // const firstInViewport = Array.from(elementsToTest).find(element => {
+    //   const { top, bottom, left, right } = (element as HTMLElement).getBoundingClientRect();
+
+    //   return bottom > 0 && top < window.innerHeight && left > 0 && right < window.innerWidth;
+    // });
+
+    // console.log(firstInViewport);
+
     const columnWidth = divRef.current.clientWidth;
 
     // Simple touch event

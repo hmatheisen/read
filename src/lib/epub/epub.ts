@@ -48,6 +48,9 @@ class Epub {
         return this.findChapterTitleNav(chapter);
       case "ncx":
         return this.findChapterTitleNcx(chapter);
+      default:
+        console.warn("Unkonwn TOC type: ", this.toc.type);
+        return null;
     }
   }
 
